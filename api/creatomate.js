@@ -93,12 +93,18 @@ module.exports = async function handler(req, res) {
       elements
     };
 
+    if (req.query && req.query.debug === '1') {
+      return res.status(200).json({ version: 'v2-flat-shapes', element_count: elements.length, source });
+    }
+
     const r = await fetch('https://api.creatomate.com/v1/renders', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ source })
     });
-    return res.status(r.status).json(await r.json());
+    const data = await r.json();
+    if (Array.isArray(data) && data[0]) data[0].__version = 'v2-flat-shapes';
+    return res.status(r.status).json(data);
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
