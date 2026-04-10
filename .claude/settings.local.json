@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:creatomate.com)",
+      "Bash(curl -s -X GET https://api.creatomate.com/v1/templates/612bea09-5b1a-4be5-86b2-e7e51457e28e -H 'Authorization: Bearer 0cea9be9849c4d1cae5c1cac3220f09dea2f4c8a7246d867e8419ee9e1511f63c803a9ed064164c514a0063f4a810ede')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s -X GET \"https://api.creatomate.com/v1/templates/612bea09-5b1a-4be5-86b2-e7e51457e28e\" -H \"Authorization: Bearer 0cea9be9849c4d1cae5c1cac3220f09dea2f4c8a7246d867e8419ee9e1511f63c803a9ed064164c514a0063f4a810ede\")",
+      "Bash(curl:*)",
+      "Bash(node -e ':*)",
+      "Bash(mkdir -p templates)"
+    ]
+  }
+}
