@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["ffmpeg", "dejavu_fonts"]
+
+[phases.install]
+cmds = ["npm install"]
+
+[start]
+cmd = "node api/build-video.js"
