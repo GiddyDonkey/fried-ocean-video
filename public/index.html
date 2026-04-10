@@ -716,16 +716,7 @@ pre.ffmpeg-code {
 
   <div class="form-section">
 
-    <div class="apikey-bar">
-      <label for="api-key">OPENAI KEY</label>
-      <input type="password" id="api-key" placeholder="sk-... OpenAI key, stored in browser only" autocomplete="off" />
-      <span class="apikey-note">BROWSER ONLY</span>
-    </div>
-    <div class="apikey-bar" style="border-left-color: #00ff88; margin-top: 8px;">
-      <label for="creatomate-key" style="color: #00ff88;">CREATOMATE KEY</label>
-      <input type="password" id="creatomate-key" placeholder="Creatomate API key — for video rendering" autocomplete="off" />
-      <span class="apikey-note">BROWSER ONLY</span>
-    </div>
+
 
     <div class="form-grid">
       <div class="form-full">
@@ -795,8 +786,6 @@ pre.ffmpeg-code {
 // ── Config ─────────────────────────────────────────
 // If deployed on Vercel, API calls go to /api/generate (serverless)
 // If using browser-direct mode, we call Anthropic directly with the key
-const USE_SERVERLESS = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
-
 // ── Status cycling ──────────────────────────────────
 const STATUS_MSGS = [
   'CONTACTING SOURCES...',
@@ -830,8 +819,7 @@ function hideErr() { document.getElementById('error-box').style.display = 'none'
 
 // ── Main handler ────────────────────────────────────
 async function handleGenerate() {
-  saveKeys();
-  const apiKey = document.getElementById('api-key').value.trim();
+
   const headline = document.getElementById('headline').value.trim();
   const subheadline = document.getElementById('subheadline').value.trim();
   const article_url = document.getElementById('article_url').value.trim();
@@ -848,25 +836,18 @@ async function handleGenerate() {
 
   try {
     let videos;
-
-    if (USE_SERVERLESS && !apiKey) {
-      // Serverless mode — key stored in Vercel env
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ headline, subheadline, article_url, tone, video_count, platform }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Server error ${res.status}`);
-      }
-      const data = await res.json();
-      videos = data.videos;
-    } else {
-      // Browser-direct mode — key entered in field
-      if (!apiKey) { throw new Error('Enter your Anthropic API key above, or set ANTHROPIC_API_KEY in Vercel env vars.'); }
-      videos = await callAnthropicDirect(apiKey, { headline, subheadline, article_url, tone, video_count, platform });
+    // Always use serverless — keys stored in Vercel env vars
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ headline, subheadline, article_url, tone, video_count, platform }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
     }
+    const data = await res.json();
+    videos = data.videos;
 
     stopStatus();
     setStatus(`${videos.length} VIDEOS READY — CLEARED FOR BROADCAST`);
@@ -1261,12 +1242,6 @@ function escHtml(str) {
 const CREATOMATE_TEMPLATE_ID = '612bea09-5b1a-4be5-86b2-e7e51457e28e';
 
 async function renderVideo(idx, btn) {
-  const cmKey = document.getElementById('creatomate-key').value.trim();
-  if (!cmKey) {
-    showErr('Enter your Creatomate API key to render videos.');
-    return;
-  }
-
   const v = JSON.parse(document.querySelectorAll('.vcard')[idx].dataset.v);
   const bg = document.querySelectorAll('.vcard')[idx].dataset.bg || '#000000';
   const accent = document.querySelectorAll('.vcard')[idx].dataset.accent || '#cc2200';
@@ -1295,12 +1270,9 @@ async function renderVideo(idx, btn) {
 
   try {
     // Submit render
-    const submitRes = await fetch('https://api.creatomate.com/v1/renders', {
+    const submitRes = await fetch('/api/creatomate', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${cmKey}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         template_id: CREATOMATE_TEMPLATE_ID,
         modifications
@@ -1331,9 +1303,7 @@ async function renderVideo(idx, btn) {
       }
 
       try {
-        const pollRes = await fetch(`https://api.creatomate.com/v1/renders/${renderId}`, {
-          headers: { 'Authorization': `Bearer ${cmKey}` }
-        });
+        const pollRes = await fetch(`/api/creatomate?render_id=${renderId}`);
         const data = await pollRes.json();
 
         if (data.status === 'succeeded') {
@@ -1367,26 +1337,7 @@ async function renderVideo(idx, btn) {
 }
 
 
-// ── Key persistence ─────────────────────────────────────────────────────────
-function loadSavedKeys() {
-  const oai = localStorage.getItem('fo_openai_key');
-  const cm  = localStorage.getItem('fo_creatomate_key');
-  if (oai) document.getElementById('api-key').value = oai;
-  if (cm)  document.getElementById('creatomate-key').value = cm;
-}
 
-function saveKeys() {
-  const oai = document.getElementById('api-key').value.trim();
-  const cm  = document.getElementById('creatomate-key').value.trim();
-  if (oai) localStorage.setItem('fo_openai_key', oai);
-  if (cm)  localStorage.setItem('fo_creatomate_key', cm);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadSavedKeys();
-  document.getElementById('api-key').addEventListener('change', saveKeys);
-  document.getElementById('creatomate-key').addEventListener('change', saveKeys);
-});
 
 document.addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') handleGenerate();
