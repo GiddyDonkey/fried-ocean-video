@@ -13,62 +13,84 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { modifications } = req.body;
+    const { modifications } = req.body || {};
     const m = modifications || {};
+
+    const bg1 = m.background_color_1 || '#cc2200';
+    const bg2 = m.background_color_2 || '#1a1a1a';
+    const textCol1 = m.text_color_1 || '#ffffff';
+    const textCol2 = m.text_color_2 || '#ffffff';
+    const accent = m.accent_color || '#cc2200';
+    const hook = m.hook || 'FRIED OCEAN';
+    const headline = m.scene2_headline || 'BREAKING NEWS';
+    const detail = m.scene3_detail || 'The detail goes here';
+    const cta = m.scene4_cta || 'Link in bio';
+
+    const RECT = 'M 0 0 L 100 0 L 100 100 L 0 100 Z';
+
+    const scene = (time, duration, bgColor, textColor, mainText, fontSize, chyronColor, chyronText) => ([
+      {
+        type: 'shape',
+        track: 1,
+        time, duration,
+        x: '50%', y: '50%',
+        width: '100%', height: '100%',
+        fill_color: bgColor,
+        path: RECT
+      },
+      {
+        type: 'text',
+        track: 2,
+        time, duration,
+        x: '50%', y: '45%',
+        width: '90%', height: '60%',
+        text: mainText,
+        font_family: 'Oswald',
+        font_weight: '700',
+        font_size: fontSize,
+        fill_color: textColor,
+        x_alignment: '50%',
+        y_alignment: '50%'
+      },
+      {
+        type: 'shape',
+        track: 3,
+        time, duration,
+        x: '50%', y: '94%',
+        width: '100%', height: '8%',
+        fill_color: chyronColor,
+        path: RECT
+      },
+      {
+        type: 'text',
+        track: 4,
+        time, duration,
+        x: '50%', y: '94%',
+        width: '90%', height: '6%',
+        text: chyronText,
+        font_family: 'Oswald',
+        font_weight: '700',
+        font_size: '52',
+        fill_color: '#ffffff',
+        x_alignment: '50%',
+        y_alignment: '50%'
+      }
+    ]);
+
+    const elements = [
+      ...scene(0,    3,   bg1,       textCol1,  hook,     '140', '#000000', 'FRIED OCEAN'),
+      ...scene(3,    2.5, bg2,       textCol2,  headline, '120', accent,    'BREAKING'),
+      ...scene(5.5,  3.5, bg1,       textCol1,  detail,   '100', '#000000', 'FRIED OCEAN'),
+      ...scene(9,    3,   '#000000', '#ffffff', cta,      '120', accent,    'friedocean.com'),
+    ];
 
     const source = {
       output_format: 'mp4',
       width: 1080,
       height: 1920,
-      frame_rate: '30 fps',
+      frame_rate: 30,
       duration: 12,
-      elements: [
-        {
-          type: 'video', track: 1, time: 0, duration: 3,
-          elements: [
-            { type: 'shape', shape: 'rectangle', track: 1, x: '50%', y: '50%', width: '100%', height: '100%', fill_color: m.background_color_1 || '#cc2200' },
-            { type: 'text', track: 2, x: '50%', y: '42%', width: '85%', font_family: 'Oswald', font_weight: '700', font_size: '12 vmin', fill_color: m.text_color_1 || '#ffffff', text: m.hook || 'FRIED OCEAN', x_alignment: '50%', y_alignment: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 3, x: '0%', y: '100%', width: '26%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: m.accent_color || '#cc2200' },
-            { type: 'text', track: 4, x: '2.5%', y: '96.5%', width: '24%', font_family: 'Oswald', font_weight: '700', font_size: '2.8 vmin', fill_color: '#ffffff', text: 'FRIED OCEAN', x_anchor: '0%', y_anchor: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 5, x: '26%', y: '100%', width: '74%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: '#000000', opacity: '88%' },
-            { type: 'text', track: 6, x: '28%', y: '96.5%', width: '70%', font_family: 'IBM Plex Mono', font_size: '2.2 vmin', fill_color: '#ffffff', text: m.scene2_headline || 'BREAKING NEWS', x_anchor: '0%', y_anchor: '50%' }
-          ]
-        },
-        {
-          type: 'video', track: 1, time: 3, duration: 2.5,
-          elements: [
-            { type: 'shape', shape: 'rectangle', track: 1, x: '50%', y: '50%', width: '100%', height: '100%', fill_color: m.background_color_2 || '#000000' },
-            { type: 'text', track: 2, x: '50%', y: '42%', width: '85%', font_family: 'Oswald', font_weight: '700', font_size: '9 vmin', fill_color: m.text_color_2 || '#ffffff', text: m.scene2_headline || 'BREAKING NEWS', x_alignment: '50%', y_alignment: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 3, x: '0%', y: '100%', width: '22%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: m.accent_color || '#cc2200' },
-            { type: 'text', track: 4, x: '2.5%', y: '96.5%', width: '20%', font_family: 'Oswald', font_weight: '700', font_size: '2.8 vmin', fill_color: '#ffffff', text: 'BREAKING', x_anchor: '0%', y_anchor: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 5, x: '22%', y: '100%', width: '78%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: '#000000', opacity: '88%' },
-            { type: 'text', track: 6, x: '24%', y: '96.5%', width: '74%', font_family: 'IBM Plex Mono', font_size: '2.2 vmin', fill_color: '#ffffff', text: m.scene2_headline || 'BREAKING NEWS', x_anchor: '0%', y_anchor: '50%' }
-          ]
-        },
-        {
-          type: 'video', track: 1, time: 5.5, duration: 3.5,
-          elements: [
-            { type: 'shape', shape: 'rectangle', track: 1, x: '50%', y: '50%', width: '100%', height: '100%', fill_color: m.background_color_1 || '#cc2200' },
-            { type: 'text', track: 2, x: '50%', y: '42%', width: '85%', font_family: 'Oswald', font_weight: '700', font_size: '7.5 vmin', fill_color: m.text_color_1 || '#ffffff', text: m.scene3_detail || 'More details here', x_alignment: '50%', y_alignment: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 3, x: '0%', y: '100%', width: '26%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: m.accent_color || '#cc2200' },
-            { type: 'text', track: 4, x: '2.5%', y: '96.5%', width: '24%', font_family: 'Oswald', font_weight: '700', font_size: '2.8 vmin', fill_color: '#ffffff', text: 'FRIED OCEAN', x_anchor: '0%', y_anchor: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 5, x: '26%', y: '100%', width: '74%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: '#000000', opacity: '88%' },
-            { type: 'text', track: 6, x: '28%', y: '96.5%', width: '70%', font_family: 'IBM Plex Mono', font_size: '2.2 vmin', fill_color: '#ffffff', text: m.scene3_detail || 'More details here', x_anchor: '0%', y_anchor: '50%' }
-          ]
-        },
-        {
-          type: 'video', track: 1, time: 9, duration: 3,
-          elements: [
-            { type: 'shape', shape: 'rectangle', track: 1, x: '50%', y: '50%', width: '100%', height: '100%', fill_color: '#000000' },
-            { type: 'text', track: 2, x: '50%', y: '40%', width: '85%', font_family: 'Oswald', font_weight: '700', font_size: '11 vmin', fill_color: '#ffffff', text: m.scene4_cta || 'Link in bio', x_alignment: '50%', y_alignment: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 3, x: '50%', y: '52%', width: '80%', height: '0.3%', x_anchor: '50%', fill_color: m.accent_color || '#cc2200' },
-            { type: 'shape', shape: 'rectangle', track: 4, x: '0%', y: '100%', width: '26%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: m.accent_color || '#cc2200' },
-            { type: 'text', track: 5, x: '2.5%', y: '96.5%', width: '24%', font_family: 'Oswald', font_weight: '700', font_size: '2.8 vmin', fill_color: '#ffffff', text: 'FRIED OCEAN', x_anchor: '0%', y_anchor: '50%' },
-            { type: 'shape', shape: 'rectangle', track: 6, x: '26%', y: '100%', width: '74%', height: '4.7%', x_anchor: '0%', y_anchor: '100%', fill_color: '#000000', opacity: '88%' },
-            { type: 'text', track: 7, x: '28%', y: '96.5%', width: '70%', font_family: 'IBM Plex Mono', font_size: '2.2 vmin', fill_color: '#ffffff', text: 'friedocean.com', x_anchor: '0%', y_anchor: '50%' }
-          ]
-        }
-      ]
+      elements
     };
 
     const r = await fetch('https://api.creatomate.com/v1/renders', {
