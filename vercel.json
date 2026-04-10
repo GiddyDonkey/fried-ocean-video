@@ -1,19 +1,13 @@
 {
   "version": 2,
   "routes": [
-    {
-      "src": "/api/generate",
-      "dest": "/api/generate.js"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
+    { "src": "/api/generate", "dest": "/api/generate.js" },
+    { "src": "/api/creatomate", "dest": "/api/creatomate.js" },
+    { "src": "/", "dest": "/index.html" }
   ],
   "functions": {
-    "api/generate.js": {
-      "maxDuration": 60
-    }
+    "api/generate.js": { "maxDuration": 60, "runtime": "nodejs18.x" },
+    "api/creatomate.js": { "maxDuration": 60, "runtime": "nodejs18.x" }
   },
   "headers": [
     {
@@ -21,7 +15,7 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, x-api-key" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     }
   ]
