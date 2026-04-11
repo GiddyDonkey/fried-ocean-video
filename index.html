@@ -30,7 +30,7 @@ body { background: var(--white); color: var(--black); font-family: var(--font-bo
 input[type="text"], select { width: 100%; background: var(--gray); border: 1px solid var(--gray2); color: var(--black); font-family: var(--font-body); font-size: 14px; padding: 10px 12px; outline: none; border-radius: 4px; transition: border-color 0.15s; appearance: none; }
 input:focus, select:focus { border-color: var(--black); }
 select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 10px; padding-right: 32px; cursor: pointer; }
-.form-row2 { grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr 1fr 280px; gap: 16px; align-items: end; }
+.form-row2 { grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr 280px; gap: 16px; align-items: end; }
 .gen-btn { width: 100%; padding: 12px; background: var(--red); color: #fff; border: none; cursor: pointer; font-family: var(--font-display); font-size: 22px; letter-spacing: 3px; border-radius: 4px; transition: opacity 0.15s; }
 .gen-btn:hover { opacity: 0.85; }
 .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -47,7 +47,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .vcard.selected { border-color: var(--black); box-shadow: 0 0 0 2px var(--black); }
 .vcard-num { position: absolute; top: 10px; left: 10px; font-family: var(--font-display); font-size: 20px; color: #fff; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 3px; z-index: 3; line-height: 1.2; }
 .vcard.selected .vcard-num { background: var(--red); }
-.vcard-preview { width: 100%; aspect-ratio: 9/16; position: relative; overflow: hidden; }
+.vcard-preview { width: 100%; aspect-ratio: 9/16; max-height: 52vh; position: relative; overflow: hidden; }
 .vcard-preview video { width: 100%; height: 100%; object-fit: cover; display: none; }
 .vcard-preview video.loaded { display: block; }
 .vcard-bg { position: absolute; inset: 0; }
@@ -94,43 +94,15 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="header-sub">VIDEO STUDIO<br>SATIRICAL CONTENT ENGINE</div>
 </div>
 
-<div class="form-wrap">
-  <div class="field" style="grid-column:1/3">
-    <label>HEADLINE <span class="req">*</span></label>
-    <input type="text" id="headline" placeholder="Study Confirms Junior High Still Greatest Place To Get Your Ass Kicked" />
-  </div>
+<div class="form-wrap" style="grid-template-columns:1fr auto;">
   <div class="field">
-    <label>ARTICLE URL</label>
+    <label>ARTICLE URL <span class="req">*</span></label>
     <input type="text" id="article_url" placeholder="https://friedocean.com/article" />
+    <input type="hidden" id="headline" />
+    <input type="hidden" id="subheadline" />
   </div>
-  <div class="form-row2">
-    <div class="field">
-      <label>SUBHEADLINE</label>
-      <input type="text" id="subheadline" placeholder="Key detail or supporting fact" />
-    </div>
-    <div class="field">
-      <label>TONE</label>
-      <select id="tone">
-        <option value="sharp satirical">Sharp Satirical</option>
-        <option value="unhinged absurdist">Unhinged Absurdist</option>
-        <option value="dry deadpan">Dry Deadpan</option>
-        <option value="outrage bait">Maximum Outrage Bait</option>
-        <option value="fake academic">Fake Academic</option>
-        <option value="conspiracy adjacent">Conspiracy Adjacent</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>PLATFORM</label>
-      <select id="platform">
-        <option value="Instagram Reels and TikTok">Reels + TikTok</option>
-        <option value="Instagram Reels">Reels Only</option>
-        <option value="TikTok">TikTok Only</option>
-        <option value="YouTube Shorts">YouTube Shorts</option>
-      </select>
-    </div>
-    <div class="field" style="display:flex;align-items:flex-end;">
-      <button class="gen-btn" id="gen-btn" onclick="handleGenerate()">GENERATE ↗</button>
-    </div>
+  <div class="field" style="display:flex;align-items:flex-end;">
+    <button class="gen-btn" id="gen-btn" onclick="handleGenerate()">GENERATE ↗</button>
   </div>
 </div>
 

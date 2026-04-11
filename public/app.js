@@ -19,15 +19,41 @@ const TONES = [
 ];
 
 async function handleGenerate() {
-  const headline = document.getElementById('headline').value.trim();
-  const subheadline = document.getElementById('subheadline').value.trim();
   const article_url = document.getElementById('article_url').value.trim();
-
   hideErr();
-  if (!headline) { showErr('HEADLINE REQUIRED.'); return; }
+  if (!article_url) { showErr('PASTE AN ARTICLE URL TO GET STARTED.'); return; }
 
   const btn = document.getElementById('gen-btn');
   btn.disabled = true;
+  setStatus('SCRAPING ARTICLE...', true);
+
+  // Scrape headline from URL
+  let headline = '';
+  let subheadline = '';
+  try {
+    const scrapeRes = await fetch('/api/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: article_url })
+    });
+    if (scrapeRes.ok) {
+      const scraped = await scrapeRes.json();
+      headline = scraped.title || '';
+      subheadline = scraped.description || '';
+    }
+  } catch(e) {}
+
+  if (!headline) {
+    // Fall back to URL slug as headline
+    try {
+      const slug = new URL(article_url).pathname.split('/').filter(Boolean).pop() || '';
+      headline = slug.replace(/-/g, ' ').replace(/\w/g, c => c.toUpperCase());
+    } catch(e) {}
+  }
+
+  if (!headline) { btn.disabled = false; setStatus(''); showErr('Could not scrape headline. Check the URL.'); return; }
+
+  setStatus(`GENERATING: "${headline.substring(0,60)}..."`, true);
   startStatus();
 
   try {

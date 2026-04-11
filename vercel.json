@@ -3,11 +3,13 @@
   "routes": [
     { "src": "/api/generate", "dest": "/api/generate.js" },
     { "src": "/api/creatomate", "dest": "/api/creatomate.js" },
+    { "src": "/api/scrape", "dest": "/api/scrape.js" },
     { "src": "/", "dest": "/index.html" }
   ],
   "functions": {
     "api/generate.js": { "maxDuration": 60 },
-    "api/creatomate.js": { "maxDuration": 60 }
+    "api/creatomate.js": { "maxDuration": 60 },
+    "api/scrape.js": { "maxDuration": 15 }
   },
   "headers": [
     {
