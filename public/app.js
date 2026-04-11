@@ -12,12 +12,16 @@ function showErr(m) { const b = document.getElementById('error-box'); b.style.di
 function hideErr() { document.getElementById('error-box').style.display = 'none'; }
 
 // ── Generate ─────────────────────────────────────────
+const TONES = [
+  { key: 'outrage bait', label: 'OUTRAGE BAIT', desc: 'Maximum emotional reaction' },
+  { key: 'unhinged absurdist', label: 'UNHINGED', desc: 'Scroll-stopping weirdness' },
+  { key: 'dry deadpan', label: 'DEADPAN', desc: 'The "wait what" reaction' },
+];
+
 async function handleGenerate() {
   const headline = document.getElementById('headline').value.trim();
   const subheadline = document.getElementById('subheadline').value.trim();
   const article_url = document.getElementById('article_url').value.trim();
-  const tone = document.getElementById('tone').value;
-  const platform = document.getElementById('platform').value;
 
   hideErr();
   if (!headline) { showErr('HEADLINE REQUIRED.'); return; }
@@ -27,18 +31,25 @@ async function handleGenerate() {
   startStatus();
 
   try {
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ headline, subheadline, article_url, tone, video_count: 3, platform }),
-    });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `Error ${res.status}`); }
-    const data = await res.json();
-    generatedVideos = data.videos;
+    // Fire 3 parallel requests, one per tone
+    const requests = TONES.map(t =>
+      fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ headline, subheadline, article_url, tone: t.key, video_count: 1, platform: 'Instagram Reels and TikTok' }),
+      }).then(r => r.ok ? r.json() : r.json().then(e => { throw new Error(e.error || `Error ${r.status}`); }))
+    );
+
+    const results = await Promise.all(requests);
+    generatedVideos = results.map((r, i) => ({ ...r.videos[0], _tone: TONES[i] }));
     selectedIdx = null;
     stopStatus();
-    setStatus('3 VIDEOS READY — SELECT ONE TO RENDER');
+    setStatus('RENDERING ALL 3 VIDEOS...');
     renderGrid(generatedVideos, article_url);
+    // Auto-render all 3 in parallel
+    Promise.all([0, 1, 2].map(i => renderOne(i))).then(() => {
+      setStatus('3 VIDEOS READY — SELECT ONE TO POST');
+    });
   } catch(err) {
     stopStatus();
     setStatus('');
@@ -78,8 +89,9 @@ function renderGrid(videos, article_url) {
 
     card.innerHTML = `
       <div class="vcard-num">${i+1}</div>
+      <div class="vcard-tone-badge" style="position:absolute;top:10px;right:10px;font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:#fff;background:rgba(0,0,0,0.6);padding:3px 7px;border-radius:3px;z-index:3;">${v._tone ? v._tone.label : ''}</div>
       <div class="vcard-preview" id="preview-${i}">
-        <video id="video-${i}" controls playsinline></video>
+        <video id="video-${i}" autoplay muted loop playsinline></video>
         <div class="vcard-bg" style="background:${bg};"></div>
         <div class="vcard-hook" style="color:${textCol};">${escHtml(v.scene1_hook || v.hook)}</div>
         <div class="vcard-chyron">
@@ -89,8 +101,8 @@ function renderGrid(videos, article_url) {
       </div>
       <div class="render-status" id="rstatus-${i}">CLICK TO SELECT · RENDER READY</div>
       <div class="vcard-footer">
-        <button class="render-btn" id="rbtn-${i}" onclick="event.stopPropagation(); renderOne(${i})">▶ RENDER VIDEO</button>
-        <button class="cap-btn" onclick="event.stopPropagation(); showCaption(${i})">CAPTION</button>
+        <button class="cap-btn" style="flex:1;" onclick="event.stopPropagation(); showCaption(${i})">COPY CAPTION</button>
+        <button class="cap-btn" id="rbtn-${i}" onclick="event.stopPropagation(); window.open(document.querySelectorAll('.vcard')[${i}].dataset.url||'#','_blank')">↓ DL</button>
       </div>
     `;
     grid.appendChild(card);
@@ -192,7 +204,12 @@ async function renderOne(idx) {
           statusEl.textContent = '✓ RENDER COMPLETE — CLICK TO DOWNLOAD';
           statusEl.onclick = () => window.open(url, '_blank');
           videoEl.src = url;
+          videoEl.autoplay = true;
+          videoEl.muted = true;
+          videoEl.loop = true;
+          videoEl.playsInline = true;
           videoEl.classList.add('loaded');
+          videoEl.play().catch(() => {});
           // Hide placeholder
           const bg = card.querySelector('.vcard-bg');
           const hook = card.querySelector('.vcard-hook');
