@@ -481,7 +481,9 @@ async function renderVideo(idx, btn) {
         background_color_2: v.bg_color || '#000000',
         text_color_1: v.text_color || '#ffffff',
         text_color_2: v.text_color || '#ffffff',
-        accent_color: v.accent_color || '#cc2200'
+        accent_color: v.accent_color || '#cc2200',
+        article_url: document.getElementById('article_url').value.trim() || '',
+        variant_index: idx
       }})
     });
 
