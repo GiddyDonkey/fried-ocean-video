@@ -1243,10 +1243,6 @@ const CREATOMATE_TEMPLATE_ID = '612bea09-5b1a-4be5-86b2-e7e51457e28e';
 
 async function renderVideo(idx, btn) {
   const v = JSON.parse(document.querySelectorAll('.vcard')[idx].dataset.v);
-  const bg = document.querySelectorAll('.vcard')[idx].dataset.bg || '#000000';
-  const accent = document.querySelectorAll('.vcard')[idx].dataset.accent || '#cc2200';
-  const textCol = document.querySelectorAll('.vcard')[idx].dataset.textcol || '#ffffff';
-
   const statusEl = document.getElementById(`render-status-${idx}`);
   const videoEl = document.getElementById(`render-video-${idx}`);
   const origLabel = btn.textContent;
@@ -1254,80 +1250,71 @@ async function renderVideo(idx, btn) {
   btn.disabled = true;
   btn.textContent = 'RENDERING...';
   videoEl.style.display = 'none';
-  statusEl.innerHTML = '<div class="render-spinner"></div>SUBMITTING TO CREATOMATE...';
-
-  const modifications = {
-    "hook": v.scene1_hook || v.hook,
-    "scene2_headline": v.scene2_headline || '',
-    "scene3_detail": v.scene3_detail || '',
-    "scene4_cta": v.scene4_cta || '',
-    "background_color_1": bg,
-    "background_color_2": bg,
-    "text_color_1": textCol,
-    "text_color_2": textCol,
-    "accent_color": accent
-  };
+  statusEl.innerHTML = '<div class="render-spinner"></div>SUBMITTING TO RAILWAY...';
 
   try {
-    // Submit render
     const submitRes = await fetch('/api/creatomate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        template_id: CREATOMATE_TEMPLATE_ID,
-        modifications
-      })
+      body: JSON.stringify({ modifications: {
+        hook: v.scene1_hook || v.hook,
+        scene2_headline: v.scene2_headline,
+        scene3_detail: v.scene3_detail,
+        scene4_cta: v.scene4_cta,
+        background_color_1: v.bg_color || '#000000',
+        background_color_2: v.bg_color || '#000000',
+        text_color_1: v.text_color || '#ffffff',
+        text_color_2: v.text_color || '#ffffff',
+        accent_color: v.accent_color || '#cc2200'
+      }})
     });
 
     if (!submitRes.ok) {
       const e = await submitRes.json().catch(() => ({}));
-      throw new Error(e.message || `Creatomate error ${submitRes.status}`);
+      throw new Error(e.error || `Server error ${submitRes.status}`);
     }
 
-    const renders = await submitRes.json();
-    const render = Array.isArray(renders) ? renders[0] : renders;
-    const renderId = render.id;
+    const job = await submitRes.json();
+    const jobId = job.job_id;
+    if (!jobId) throw new Error(JSON.stringify(job));
 
-    statusEl.innerHTML = '<div class="render-spinner"></div>RENDERING... THIS TAKES ~20 SECONDS';
+    statusEl.innerHTML = '<div class="render-spinner"></div>BUILDING VIDEO ON RAILWAY...';
 
-    // Poll for completion
     let attempts = 0;
     const poll = setInterval(async () => {
       attempts++;
-      if (attempts > 60) {
+      if (attempts > 90) {
         clearInterval(poll);
-        statusEl.innerHTML = '⚠ TIMED OUT — CHECK CREATOMATE DASHBOARD';
+        statusEl.innerHTML = '⚠ TIMED OUT';
         btn.disabled = false;
         btn.textContent = origLabel;
         return;
       }
-
       try {
-        const pollRes = await fetch(`/api/creatomate?render_id=${renderId}`);
-        const data = await pollRes.json();
+        const r = await fetch(`/api/creatomate?job_id=${jobId}`);
+        const data = await r.json();
 
-        if (data.status === 'succeeded') {
+        if (data.status === 'complete' && data.files && data.files.length > 0) {
           clearInterval(poll);
+          const url = data.files[0].url;
           statusEl.innerHTML = '✓ RENDER COMPLETE — CLICK TO DOWNLOAD';
           statusEl.style.cursor = 'pointer';
-          statusEl.onclick = () => window.open(data.url, '_blank');
-          videoEl.src = data.url;
+          statusEl.onclick = () => window.open(url, '_blank');
+          videoEl.src = url;
           videoEl.style.display = 'block';
           btn.textContent = '↓ DOWNLOAD';
           btn.disabled = false;
-          btn.onclick = () => window.open(data.url, '_blank');
+          btn.onclick = () => window.open(url, '_blank');
         } else if (data.status === 'failed') {
           clearInterval(poll);
-          statusEl.innerHTML = `⚠ RENDER FAILED: ${data.error || 'unknown error'}`;
+          statusEl.innerHTML = `⚠ FAILED: ${data.error || 'unknown'}`;
           btn.disabled = false;
           btn.textContent = origLabel;
         } else {
-          statusEl.innerHTML = `<div class="render-spinner"></div>RENDERING... (${data.status?.toUpperCase()})`;
+          statusEl.innerHTML = `<div class="render-spinner"></div>BUILDING... (${data.progress || 0}%)`;
         }
-      } catch(e) {
-        // keep polling
-      }
-    }, 2000);
+      } catch(e) {}
+    }, 3000);
 
   } catch(err) {
     statusEl.innerHTML = `⚠ ${err.message}`;
@@ -1336,13 +1323,7 @@ async function renderVideo(idx, btn) {
   }
 }
 
+// DEAD CODE REPLACED - old renderVideo below this point is removed
+function _OLD_renderVideo(idx, btn) {
+}
 
-
-
-document.addEventListener('keydown', e => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') handleGenerate();
-});
-</script>
-</body>
-</html>
-<!-- Fri Apr 10 22:17:10 UTC 2026 -->
