@@ -11,6 +11,12 @@
   },
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; default-src 'self' 'unsafe-inline' https: data:;" }
+      ]
+    },
+    {
       "source": "/api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
