@@ -5,33 +5,37 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'OPENAI_API_KEY not set' });
 
-  const { headline, subheadline = '', article_url = 'friedocean.com', tone = 'sharp satirical', video_count = 1, platform = 'Instagram Reels and TikTok' } = req.body;
+  const { headline, subheadline = '', article_url = 'friedocean.com', tone = 'sharp satirical', video_count = 1 } = req.body;
   if (!headline) return res.status(400).json({ error: 'Headline required' });
 
   const toneMap = {
-    'outrage bait': 'Righteous indignation. Make the audience feel personally wronged by this news.',
-    'unhinged absurdist': 'Absurd angle on a real story. Unexpected but still connected to the actual facts.',
-    'dry deadpan': 'Deliver the facts completely straight, as if this is normal. No jokes, just facts stated flatly.'
+    'outrage bait': 'Righteous indignation. The audience should feel personally cheated or wronged. Short, punchy, declarative.',
+    'unhinged absurdist': 'Find the most absurd angle on the real facts. Lean into double entendres, sexual innuendo, or dark irony. Still grounded in the actual story.',
+    'dry deadpan': 'Deliver the most damning or ridiculous fact completely straight. No jokes, no editorializing. Just the raw absurd truth stated flatly.'
   };
 
-  const prompt = `You write short-form video copy for Fried Ocean, a satirical news brand like The Onion.
+  const prompt = `You write short punchy video copy for Fried Ocean — a satirical news brand. Think The Onion meets social media. Your audience is adults who appreciate dark humor, sexual innuendo, and edgy comedy. Push boundaries but stay logical and story-relevant.
 
-REAL STORY HEADLINE: "${headline}"
+STORY: "${headline}"
 DETAIL: "${subheadline || 'none'}"
 TONE: ${toneMap[tone] || toneMap['outrage bait']}
 
-Write copy that satirizes the ACTUAL story. Stay connected to the real facts. Be edgy and dark but make sense.
+Write copy that:
+- Makes sense and directly relates to the actual story
+- Is scroll-stopping: provocative, funny, edgy, or uses innuendo/dark humor where natural
+- Uses real facts from the story — don't make things up
+- Is concise — shorter is always better
 
-RULES:
-- hook: 4-6 words MAX. One punchy statement about this specific story. No questions. No exclamation points.
-- scene2_headline: Rewrite the headline in 5-7 words. Present tense. Sharp. Must relate to the actual story.
-- scene3_detail: The single most absurd or damning fact from the story. 8 words MAX. Just the fact.
-- caption: 2 sentences. Satirical. References the actual story. Ends with: ${article_url}
-- scene4_cta: exactly "FOLLOW FOR MORE" — nothing else
-- bg_color: a dark hex color
-- accent_color: a bold contrasting hex color
+FIELD RULES (STRICT):
+hook: 4-6 words. One punchy line. No questions. No exclamation points. Can use innuendo or dark humor if natural.
+scene1_hook: same as hook
+scene2_headline: 5-8 words rewriting the headline. Punchy. Present tense. Can editorialize slightly.
+scene3_detail: The single most interesting/absurd/damning fact from the story. 6-10 words. Just the fact, stated flat.
+scene4_cta: write exactly the string "FOLLOW FOR MORE" — nothing else, no handle, no @ symbol
+caption: 2 punchy sentences in Fried Ocean voice. Can be dark or use innuendo. Ends with: ${article_url}
+hashtags: 5 relevant specific hashtags
 
-Return ONLY this exact JSON structure with no extra text:
+Return ONLY valid JSON, no markdown:
 {"videos":[{"hook":"","hook_style":"DEADPAN","caption":"","hashtags":["","","","",""],"cta":"FOLLOW FOR MORE","scene1_hook":"","scene2_headline":"","scene3_detail":"","scene4_cta":"FOLLOW FOR MORE","visual_direction":"","energy_level":8,"bg_color":"#0a0a0a","text_color":"#ffffff","accent_color":"#cc2200"}]}`;
 
   try {
@@ -40,8 +44,8 @@ Return ONLY this exact JSON structure with no extra text:
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: 'gpt-4o',
-        max_tokens: 600,
-        temperature: 0.85,
+        max_tokens: 700,
+        temperature: 0.9,
         messages: [{ role: 'user', content: prompt }]
       }),
     });
