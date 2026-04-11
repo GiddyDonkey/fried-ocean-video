@@ -270,32 +270,59 @@ async function renderOne(idx) {
 }
 
 // ── Post To Platform ─────────────────────────────────
+const PLATFORM_HANDLES = {
+  tiktok: '@thefriedocean',
+  reels: '@thefriedocean',
+  shorts: '@FriedOcean'
+};
+
+const PLATFORM_URLS = {
+  tiktok: 'https://www.tiktok.com/upload',
+  reels: 'https://www.instagram.com/reels/new',
+  shorts: 'https://studio.youtube.com'
+};
+
+const PLATFORM_NAMES = {
+  tiktok: 'TikTok',
+  reels: 'Instagram Reels',
+  shorts: 'YouTube Shorts'
+};
+
 async function postTo(platform) {
   if (selectedIdx === null) return;
   const card = document.querySelectorAll('.vcard')[selectedIdx];
   const videoUrl = card.dataset.url;
   const v = generatedVideos[selectedIdx];
+  const statusEl = document.getElementById('post-status');
 
   if (!videoUrl) {
-    document.getElementById('post-status').textContent = '⚠ Render this video first before posting.';
+    statusEl.textContent = '⚠ Video still rendering — wait for it to finish.';
     return;
   }
 
-  const statusEl = document.getElementById('post-status');
-  const platformNames = { tiktok: 'TikTok', reels: 'Instagram Reels', shorts: 'YouTube Shorts' };
-  const platformName = platformNames[platform];
+  const handle = PLATFORM_HANDLES[platform];
+  const articleUrl = card.dataset.article_url || 'friedocean.com';
 
-  // For now — copy the video URL and caption to clipboard, open the platform
-  const caption = (v.caption || '') + '\n\n' + (v.hashtags || []).join(' ');
+  // Build platform-specific caption
+  const baseCaption = v.caption || '';
+  // Replace any existing URL/handle at end, append platform handle
+  const cleanCaption = baseCaption.replace(/https?:\/\/\S+\s*$/,'').trim();
+  const caption = `${cleanCaption}
+
+Follow us: ${handle}
+${articleUrl}
+
+${(v.hashtags || []).join(' ')}`;
+
   await navigator.clipboard.writeText(caption).catch(() => {});
 
-  const urls = {
-    tiktok: 'https://www.tiktok.com/upload',
-    reels: 'https://www.instagram.com/reels/new',
-    shorts: 'https://studio.youtube.com'
-  };
+  // Trigger download
+  const a = document.createElement('a');
+  a.href = videoUrl;
+  a.download = `fried-ocean-${platform}-${Date.now()}.mp4`;
+  a.click();
 
-  statusEl.innerHTML = `✓ Caption copied to clipboard. <a href="${videoUrl}" target="_blank" style="color:var(--black);font-weight:500;">Download video</a> then post to <a href="${urls[platform]}" target="_blank" style="color:var(--black);font-weight:500;">${platformName}</a>.`;
+  statusEl.innerHTML = `✓ Caption copied + download started. <a href="${PLATFORM_URLS[platform]}" target="_blank" style="color:var(--black);font-weight:600;text-decoration:underline;">Open ${PLATFORM_NAMES[platform]} →</a>`;
 }
 
 // ── Helpers ───────────────────────────────────────────
