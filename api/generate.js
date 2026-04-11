@@ -8,38 +8,42 @@ module.exports = async function handler(req, res) {
   const { headline, subheadline = '', article_url = 'friedocean.com', tone = 'sharp satirical', video_count = 1, platform = 'Instagram Reels and TikTok' } = req.body;
   if (!headline) return res.status(400).json({ error: 'Headline required' });
 
-  const tones = {
-    'outrage bait': 'Maximum righteous indignation. The audience should feel personally wronged. Short, punchy, declarative. Like a friend texting you in all caps.',
-    'unhinged absurdist': 'Completely unhinged. The joke should come from an unexpected angle that makes no logical sense but is weirdly perfect. Think The Onion at its most deranged.',
-    'dry deadpan': 'Zero emotion. Deliver the most insane information like reading a grocery list. The comedy is entirely in the contrast. Clinical language, absurd content.'
+  const toneMap = {
+    'outrage bait': 'Righteous indignation. Make the audience feel personally wronged by this news.',
+    'unhinged absurdist': 'Absurd angle on a real story. Unexpected but still connected to the actual facts.',
+    'dry deadpan': 'Deliver the facts completely straight, as if this is normal. No jokes, just facts stated flatly.'
   };
 
-  const prompt = `You are a writer for Fried Ocean, a viral satirical news brand. Your job: write SHORT, PUNCHY video copy that makes people stop scrolling.
+  const prompt = `You write short-form video copy for Fried Ocean, a satirical news brand like The Onion.
 
-STORY: ${headline}
-DETAIL: ${subheadline || 'none'}
-TONE: ${tones[tone] || tones['outrage bait']}
+REAL STORY HEADLINE: "${headline}"
+DETAIL: "${subheadline || 'none'}"
+TONE: ${toneMap[tone] || toneMap['outrage bait']}
 
-STRICT RULES:
-- hook: MAX 6 WORDS. A single declarative statement. No questions. No exclamation points. Make it land like a punch. Examples of good hooks: "Nobody asked him to leave", "Turns out fires are hot", "Study confirms what we knew"
-- scene1_hook: same as hook, formatted for big text
-- scene2_headline: rewrite the headline as a 6-8 word chyron. Punchy. Present tense.
-- scene3_detail: ONE sentence, max 10 words, the most absurd/damning specific fact from the story
-- scene4_cta: "FOLLOW FOR MORE"
-- caption: 2 short punchy sentences in Fried Ocean voice. End with the URL. Do NOT include hashtags here.
-- hashtags: 5 specific relevant hashtags
-- bg_color: dark hex color that fits the mood
-- text_color: #ffffff
-- accent_color: bold hex accent
+Write copy that satirizes the ACTUAL story. Stay connected to the real facts. Be edgy and dark but make sense.
 
-Return ONLY valid JSON:
-{"videos":[{"hook":"","hook_style":"DEADPAN","caption":"","hashtags":[],"cta":"FOLLOW FOR MORE","scene1_hook":"","scene2_headline":"","scene3_detail":"","scene4_cta":"FOLLOW FOR MORE","visual_direction":"","energy_level":8,"bg_color":"#0a0a0a","text_color":"#ffffff","accent_color":"#cc2200"}]}`;
+RULES:
+- hook: 4-6 words MAX. One punchy statement about this specific story. No questions. No exclamation points.
+- scene2_headline: Rewrite the headline in 5-7 words. Present tense. Sharp. Must relate to the actual story.
+- scene3_detail: The single most absurd or damning fact from the story. 8 words MAX. Just the fact.
+- caption: 2 sentences. Satirical. References the actual story. Ends with: ${article_url}
+- scene4_cta: exactly "FOLLOW FOR MORE" — nothing else
+- bg_color: a dark hex color
+- accent_color: a bold contrasting hex color
+
+Return ONLY this exact JSON structure with no extra text:
+{"videos":[{"hook":"","hook_style":"DEADPAN","caption":"","hashtags":["","","","",""],"cta":"FOLLOW FOR MORE","scene1_hook":"","scene2_headline":"","scene3_detail":"","scene4_cta":"FOLLOW FOR MORE","visual_direction":"","energy_level":8,"bg_color":"#0a0a0a","text_color":"#ffffff","accent_color":"#cc2200"}]}`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'gpt-4o', max_tokens: 800, temperature: 0.95, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 600,
+        temperature: 0.85,
+        messages: [{ role: 'user', content: prompt }]
+      }),
     });
     if (!response.ok) { const e = await response.json().catch(() => ({})); return res.status(response.status).json({ error: e.error?.message || `Error ${response.status}` }); }
     const data = await response.json();
