@@ -6,8 +6,8 @@
     { "src": "/", "dest": "/index.html" }
   ],
   "functions": {
-    "api/generate.js": { "maxDuration": 60, "runtime": "nodejs18.x" },
-    "api/creatomate.js": { "maxDuration": 60, "runtime": "nodejs18.x" }
+    "api/generate.js": { "maxDuration": 60 },
+    "api/creatomate.js": { "maxDuration": 60 }
   },
   "headers": [
     {

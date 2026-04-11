@@ -3,3 +3,5 @@ node_modules/
 .vercel/
 *.mp4
 /tmp/
+
+.vercel
