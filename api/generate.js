@@ -22,9 +22,11 @@ TONE: ${toneMap[tone] || toneMap['outrage bait']}
 
 Write copy that:
 - Makes sense and directly relates to the actual story
-- Is scroll-stopping: provocative, funny, edgy, or uses innuendo/dark humor where natural
-- Uses real facts from the story — don't make things up
-- Is concise — shorter is always better
+- Is genuinely edgy, NSFW, uncomfortable in a funny way — use sexual innuendo freely when the story allows it
+- Uses dark humor, profanity where it lands, and pushes right up to the line
+- Still makes sense and relates to the actual story — no random weirdness
+- Short and punchy — every word earns its place
+- Should make someone think "I can't believe they posted that" but also share it anyway
 
 FIELD RULES (STRICT):
 hook: 4-6 words. One punchy line. No questions. No exclamation points. Can use innuendo or dark humor if natural.
