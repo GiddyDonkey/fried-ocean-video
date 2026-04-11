@@ -11,13 +11,13 @@
   --red: #cc2200;
   --red-hot: #ff3300;
   --yellow: #ffcc00;
-  --black: #060606;
-  --white: #f2ede4;
-  --gray: #141414;
-  --gray2: #1e1e1e;
-  --gray3: #2c2c2c;
-  --muted: #666;
-  --green: #00ff88;
+  --black: #ffffff;
+  --white: #111111;
+  --gray: #f0f0f0;
+  --gray2: #e0e0e0;
+  --gray3: #cccccc;
+  --muted: #888;
+  --green: #006633;
   --font-display: 'Bebas Neue', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
   --font-body: 'IBM Plex Sans', sans-serif;
@@ -34,15 +34,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Scanlines */
-body::before {
-  content:'';
-  position:fixed;
-  inset:0;
-  background: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.12) 3px,rgba(0,0,0,0.12) 4px);
-  pointer-events:none;
-  z-index:9999;
-}
+
 
 /* ===== TICKER ===== */
 .ticker-wrap {
@@ -98,7 +90,7 @@ body::before {
   position: absolute;
   top: 4px; left: 4px;
   color: var(--red);
-  opacity: 0.35;
+  opacity: 0.15;
   animation: glitch 5s infinite;
   pointer-events: none;
 }
@@ -322,6 +314,7 @@ select option { background: #1e1e1e; }
 
 .vcard {
   background: var(--gray);
+  border: 1px solid var(--gray3);
   border-left: 4px solid var(--red);
   position: relative;
 }
@@ -695,11 +688,7 @@ pre.ffmpeg-code {
 </head>
 <body>
 
-<div class="ticker-wrap" aria-hidden="true">
-  <div class="ticker-inner">
-    BREAKING: FRIED OCEAN VIDEO GENERATOR OPERATIONAL &nbsp;◆&nbsp; SOURCES CONFIRM: CONTENT PIPELINE FULLY ARMED &nbsp;◆&nbsp; DEVELOPING: SATIRICAL MEDIA MACHINE COMES ONLINE &nbsp;◆&nbsp; EXPERTS CALL IT "THE FASTEST WAY TO POST" &nbsp;◆&nbsp; FRIED OCEAN — SPEAKING TRUTH TO PARODY SINCE FOREVER &nbsp;◆&nbsp; THIS TOOL IS NOT AFFILIATED WITH JOURNALISM &nbsp;◆&nbsp; BREAKING: FRIED OCEAN VIDEO GENERATOR OPERATIONAL &nbsp;◆&nbsp; SOURCES CONFIRM: CONTENT PIPELINE FULLY ARMED &nbsp;◆&nbsp;
-  </div>
-</div>
+
 
 <div class="container">
 
