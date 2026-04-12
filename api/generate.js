@@ -30,6 +30,7 @@ Write copy that:
 
 FIELD RULES (STRICT):
 hook: 4-6 words. One punchy line. No questions. No exclamation points. Can use innuendo or dark humor if natural.
+scene3_detail: MUST contain at least one sexually suggestive, profane, or conspicuously provocative word or phrase. Still related to the story. This is the money line — make it uncomfortable in a funny way.
 scene1_hook: same as hook
 scene2_headline: 5-8 words rewriting the headline. Punchy. Present tense. Can editorialize slightly.
 scene3_detail: The single most interesting/absurd/damning fact from the story. 6-10 words. Just the fact, stated flat.
