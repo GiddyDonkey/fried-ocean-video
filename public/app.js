@@ -68,6 +68,7 @@ async function handleGenerate() {
 
     const results = await Promise.all(requests);
     generatedVideos = results.map((r, i) => ({ ...r.videos[0], _tone: TONES[i] }));
+    window._scrapedHeadline = headline;
     selectedIdx = null;
     stopStatus();
     setStatus('RENDERING ALL 3 VIDEOS...');
